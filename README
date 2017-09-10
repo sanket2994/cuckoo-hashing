@@ -1,0 +1,109 @@
+
+This is a github repository which implements cuckoo hashing technique .
+It hashes the packet received of a particular flow into the hashtable using a key
+which is created using the 5 ip tuple parameters.
+
+The repository consisits of the following : 
+
+1. include folder- consists of the header files ofthe library.
+2. src folder- consists of the source files of the library.
+3. test folder- consists of the client and server application which uses this library.
+4. Makefile -for automation of the build process
+
+The test folder consists of clients folder that consists of a tcp client , an udpclient.
+These clients can insert, delete or lookup for an entry in the hashtable.
+The test clients and servers are made only to ahndle tcp and udp packets.
+But the library is generic and can be used with any protocol. 
+You need to design your application program accordingly.
+
+
+The server applications are responsible for receiving the packet and insert, delete or lookup 
+for the packet respectively.
+
+The server applications are designed using three techniques:
+	1. using poll() system call.
+	2. using multithreaded approach.
+	3. packet sniffer using a raw socket.
+
+You can use either one of the application for testing the hash library.
+
+The hash libary consists of three main functions:
+	1. insert_packet(void *data): for inserting the entry(packet).
+		This functions takes a packet and calculates an index according to the IP tuple parameters.
+		If the entry is not present it hashes it onto the table and updates the time stamp and initializes the count.
+		If the entry is already present for packet of the same flow then it simply updates the timestamp and also the count.
+ 
+	2. delete_packet(void *data): for deletion of the entry(packet).
+		This function looks for an existing packet in the hashtable and then deletes the packet of a particular flow.
+
+	3. lookup_packet(void *data): for looking up an entry(packet).
+		This function looks for an packet in the hashtable and prints the details of the packet if present.
+
+
+In order to use test this library clone this repository and simply type $ make on the terminal.
+once you do that you will find muktiple executable files created namely: 
+	 rawServer, multithreadServer and  pollServer: use any one of these server applications by running them on the terminal. 
+Give IP address of the server and he port number as the command line arguments respectively.
+Don't give any arguments if you are using rawServer.
+
+
+also you willfind two more additional executables for clients namely: 
+	tcpclient and udpclient: use any of these or use bith of them simultaniously by running them on the terminal.
+(give IP address of the server and he port number as the command linearguments respectively)
+	1. In order to delete or lookup for an packet firse type "delete" or "lookup" respectively and then type in the IP tuple parameters 
+		of the packet to be deleted or searched.
+	2. If you just want to insert the packet then just type in the message you want to send.
+
+
+The rawServer i.e. packet sniffer dosen't perform the packet lookup and deletion. It only does the hashing and updation of the packet.
+
+If you want to remove all the executables created after the build process simply type $ make clean on the terminal
+
+Here is an example of how to run the files on terminal: 
+
+$ make
+
+$ ./pollserver <IP_ADDRESS> <PORT_NUMBER>
+
+#on other terminal
+$./tcpclient <IP_ADDRESS> <PORT_NUMBER>
+
+#if want to delete all the executables created
+$make clean
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

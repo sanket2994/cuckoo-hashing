@@ -11,8 +11,6 @@ RAW_PATH= test/rawSocket
 
 CLI_PATH= test/clients
 
-default: all pollserver multithreadServer rawServer client
-
 
 #invoke the Makefiles present in the test directory
 all:
@@ -20,19 +18,6 @@ all:
 	$(MAKE) -C $(MULTI_PATH)
 	$(MAKE) -C $(RAW_PATH)
 	$(MAKE) -C $(CLI_PATH)
-
-#move the executables created by these Makefilesintp pwd 
-pollserver: $(POLL_PATH)/pollserver
-	mv $(POLL_PATH)/pollserver .
-
-multithreadServer: $(MULTI_PATH)/multithreadServer
-	mv $(MULTI_PATH)/multithreadServer .
-
-rawServer: $(RAW_PATH)/rawServer
-	mv $(RAW_PATH)/rawServer .
-
-client: $(CLI_PATH)/tcpclient $(CLI_PATH)/udpclient
-	mv $(CLI_PATH)/tcpclient $(CLI_PATH)/udpclient .
 
 
 clean:

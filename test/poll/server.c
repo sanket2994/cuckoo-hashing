@@ -18,13 +18,13 @@ int main(int argc, char **argv)
 {
 	int i, ret, stfd, sufd, slen, clen, ctfd, portno;
 	struct sockaddr_in saddr, caddr;
-	char buff[100], *ip;
-	ip=(char*)calloc(1,IPLEN);
+	char buff[100], ip[IPLEN];
+	
 	
 	/*if command line arguments passed */
 	if(argc==3)
 	{
-		ip=argv[1];
+		strcpy(ip,argv[1]);
 		sscanf(argv[2],"%d", &portno);
 	}
 	/*if not passed */
@@ -90,7 +90,7 @@ int main(int argc, char **argv)
 		perror("bind : udp");
 		return -1;
 	}
-	free(ip);
+
 	clifd[0].fd=stfd;
 	clifd[0].events=POLLIN;
 	nfds++;

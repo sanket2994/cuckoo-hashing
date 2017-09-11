@@ -9,7 +9,7 @@
 #include<pthread.h>
 #include"hash.h"
 #define MAX_CLI 65536
-
+#define IPLEN 16
 struct threadParamTCP{
 	struct sockaddr_in ctaddr;
 	struct sockaddr_in staddr;
@@ -52,6 +52,7 @@ void* udpHandler(void *data)
 		delpacket->hashtable=args->hashtable;
 		delete_packet((void*)delpacket);
 		memset(delpacket, 0, sizeof(struct packet));
+		free(buff1);
 		return NULL;
 	}
 
@@ -64,6 +65,7 @@ void* udpHandler(void *data)
 		lookpacket->hashtable=args->hashtable;
 		lookup_packet((void*)lookpacket);
 		memset(lookpacket, 0, sizeof(struct packet));
+		free(buff1);
 		return NULL;
 	}
 	
@@ -80,6 +82,8 @@ void* udpHandler(void *data)
 	printf("The received packet is: %s\n\n",buff);
 
 	insert_packet((void*)packet);			
+	
+
 }
 
 
@@ -105,6 +109,7 @@ void* tcpHandler(void *data)
 			delpacket->hashtable=args->hashtable;
 			delete_packet((void*)delpacket);
 			memset(delpacket, 0, sizeof(struct packet));
+			free(delpacket);
 			return NULL;
 		}
 		/*check if user wants to look up an entry */
@@ -116,6 +121,7 @@ void* tcpHandler(void *data)
 			lookpacket->hashtable=args->hashtable;
 			lookup_packet((void*)lookpacket);
 			memset(lookpacket, 0, sizeof(struct packet));
+			free(lookpacket);
 			return NULL;
 		}
 		/* or else simply hash the entry onto table */
@@ -133,7 +139,7 @@ void* tcpHandler(void *data)
 		packet->row=0;
 		packet->hashtable=args->hashtable;
 		insert_packet((void*)packet);
-		
+		free(buff1);
 	}
 
 
@@ -142,6 +148,8 @@ void* tcpHandler(void *data)
 	{
 		close(args->socketfd);
 	}
+
+
 	pthread_exit(NULL);
 	return NULL;
 
@@ -154,11 +162,11 @@ int main(int argc, char **argv)
 	int ret, i, slen, clen, stfd, ctfd, sufd, cufd, client_tcp[MAX_CLI]={0}, maxfd, portno;
 	struct sockaddr_in saddr, caddr;
 	fd_set readfds;
-	char buff[100];
-	char *ip=(char*)calloc(1, 16);
+	char buff[100], ip[IPLEN];
+	
 	if(argc==3)
 	{
-		ip=argv[1];
+		strcpy(ip, argv[1]);
 		sscanf(argv[2], "%d", &portno);
 	}
 	else
@@ -220,7 +228,9 @@ int main(int argc, char **argv)
 		perror("bind udp");
 		return -1;
 	}
-
+	
+	struct threadParamTCP args;
+	struct threadParamUDP arg1;
 	while(1)
 	{
 		pthread_t tcpThread, udpThread;
@@ -245,14 +255,14 @@ int main(int argc, char **argv)
 		{
 			/* fill the udp thread structure */
 			struct threadParamUDP args;
-			args.caddr=caddr;
-			args.saddr=saddr;
-			args.socketfd=sufd;
-			args.clen=clen;
-			args.slen=slen;
-			args.hashtable=hashtable;
+			arg1.caddr=caddr;
+			arg1.saddr=saddr;
+			arg1.socketfd=sufd;
+			arg1.clen=clen;
+			arg1.slen=slen;
+			arg1.hashtable=hashtable;
 			/*create a new udp thread */
-			pthread_create(&udpThread, NULL, udpHandler, (void*)&args);
+			pthread_create(&udpThread, NULL, udpHandler, (void*)&arg1);
 			
 		}
 		/* check if connection is on tcp socket */
@@ -267,7 +277,6 @@ int main(int argc, char **argv)
 			}
 			printf("setup: %s\n", inet_ntoa(caddr.sin_addr));
 			/* fill the tcp thread structure */
-			struct threadParamTCP args;
 			args.ctaddr=caddr;
 			args.staddr=saddr;
 			args.socketfd=ctfd;

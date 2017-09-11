@@ -21,7 +21,7 @@ void insert_packet(void *data)
 	struct packet *pack=(struct packet*)data;
 	struct table **hashtable=pack->hashtable;
 	int key[ROWS];
-	struct packet *rmpack, *packet;
+	struct packet *packet;
 	calc_index(pack, key);
 	/*check if position is available*/
 	if(hashtable[pack->row][key[pack->row]].pptr==NULL) 
@@ -40,14 +40,15 @@ void insert_packet(void *data)
 			update_packet(packet);
 			print_packet(packet);
 			printf("stored in table: %d at index: %d \n", pack->row, key[pack->row]);
-
+			memset(pack, 0, sizeof(struct packet));
+			free(pack);
 			return;
 		}
 		/*or is a new entry then remove old entry and push to the next table*/
 		else
 		{
 			printf("\n\nreallocating packet:tcp\n\n\n");
-			rmpack=hashtable[pack->row][key[pack->row]].pptr;
+			struct packet *rmpack=hashtable[pack->row][key[pack->row]].pptr;
 			if(pack->row<(ROWS-1))
 			{
 				rmpack->row=pack->row+1;	

@@ -3,48 +3,19 @@ CC=gcc
 FLAGS= -I ../../include -g
 EXECPATH= ../../
 OBJPATH= ../../src/
+LIBPATH= ../../src/
+LIBNAME= libhash.a
+LFLAGS= -lhash -L$(LIBPATH)
+
 
 default: multithreadServer clean
 
-multithreadServer: server.o hash.o
-	$(CC) -o $(EXECPATH)multithreadServer server.o hash.o -lpthread -g
+multithreadServer: server.o $(LIBPATH)$(LIBNAME)
+	$(CC) -o $(EXECPATH)multithreadServer server.o $(LFLAGS) -lpthread -g
 
 server.o: server.c
 	$(CC) $(FLAGS) -c server.c
- 
-hash.o: $(OBJPATH)hash.c
-	$(CC) $(FLAGS) -c $(OBJPATH)hash.c
 
 clean:
-	rm -rf server.o hash.o
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	rm -rf server.o
 

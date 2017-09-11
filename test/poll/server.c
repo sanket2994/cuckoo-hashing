@@ -12,14 +12,14 @@
 #include<string.h>
 #include"hash.h"
 #define MAX_CLI 65535
-
+#define IPLEN 16
 
 int main(int argc, char **argv)
 {
 	int i, ret, stfd, sufd, slen, clen, ctfd, portno;
 	struct sockaddr_in saddr, caddr;
 	char buff[100], *ip;
-	ip=(char*)calloc(1,16);
+	ip=(char*)calloc(1,IPLEN);
 	
 	/*if command line arguments passed */
 	if(argc==3)
@@ -90,7 +90,7 @@ int main(int argc, char **argv)
 		perror("bind : udp");
 		return -1;
 	}
-
+	free(ip);
 	clifd[0].fd=stfd;
 	clifd[0].events=POLLIN;
 	nfds++;
@@ -126,7 +126,7 @@ int main(int argc, char **argv)
 					}
 					printf("%s\n", inet_ntoa(caddr.sin_addr));
 					printf("The received packet is: %s\n", buff);
-					struct packet *packet=(struct packet*)calloc(1, sizeof(struct packet));		
+						
 					
 					/*If user sent a delete command*/
 					if(strcmp(buff, "delete")==0)
@@ -151,6 +151,7 @@ int main(int argc, char **argv)
 						memset(lookPacket, 0, sizeof(struct packet));				
 						break;
 					}
+					struct packet *packet=(struct packet*)calloc(1, sizeof(struct packet));	
 					packet->protocol=17;
 					packet->saddr=caddr.sin_addr.s_addr;
 					packet->daddr=saddr.sin_addr.s_addr;
@@ -159,6 +160,7 @@ int main(int argc, char **argv)
 					packet->dport=htons(saddr.sin_port);
 					packet->hashtable=hashtable;
 					insert_packet((void*)packet);			
+				
 					break;
 				}
 
@@ -181,7 +183,7 @@ int main(int argc, char **argv)
 					printf("The read data is: %s\n", buff);
 			
 										
-					struct packet *packet=(struct packet*)calloc(1, sizeof(struct packet));
+					
 						
 					/* if user want to delete packet*/
 					if(strcmp(buff, "delete")==0)
@@ -205,7 +207,8 @@ int main(int argc, char **argv)
 						lookup_packet((void*)lookPacket);
 						memset(lookPacket, 0, sizeof(struct packet));				
 						break;
-					}				
+					}
+					struct packet *packet=(struct packet*)calloc(1, sizeof(struct packet));				
 					packet->protocol=6;
 					packet->saddr=caddr.sin_addr.s_addr;
 					packet->daddr=saddr.sin_addr.s_addr;
@@ -216,7 +219,8 @@ int main(int argc, char **argv)
 					packet->hashtable=hashtable;		
 					insert_packet((void*)packet);
 					nfds++;
-
+					
+	
 				}
 				/*exixting tcp connection*/
 				else
@@ -243,7 +247,7 @@ int main(int argc, char **argv)
 						}
 						printf("\nThe received data is: %s\n", buff);
 											
-						struct packet *packet=(struct packet*)calloc(1, sizeof(struct packet));
+					
 						/*If user sent a delete command*/
 						if(strcmp(buff, "delete")==0)
 						{
@@ -267,24 +271,20 @@ int main(int argc, char **argv)
 							memset(lookPacket, 0, sizeof(struct packet));				
 							break;
 						}
-		
+						struct packet *packet=(struct packet*)calloc(1, sizeof(struct packet));	
 						packet->protocol=6;
 						packet->saddr=caddr.sin_addr.s_addr;
 						packet->daddr=saddr.sin_addr.s_addr;
 						getsockname(clifd[i].fd, (struct sockaddr*)&caddr, &clen);
-		
 						packet->sport=htons(caddr.sin_port);
 						packet->dport=htons(caddr.sin_port);
 						packet->row=0;
-						packet->hashtable=hashtable;			
+						packet->hashtable=hashtable;
 						insert_packet((void*)packet);
-						memset(packet, 0, sizeof(struct packet));
-						free(packet);
 					}
 				}
 			}
 		}
 	}	
-	
 }
 

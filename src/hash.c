@@ -1,7 +1,7 @@
 
 #include "hash.h"
 
-//caluate the index based on IP tuple parameters
+/*caluate the index based on IP tuple parameters*/
 void calc_index(struct packet *pack,int *key)
 {
 	memset(key, 0, ROWS);
@@ -15,7 +15,7 @@ void calc_index(struct packet *pack,int *key)
 	
 }
 
-//hash an entry onto the table
+/*hash an entry onto the table*/
 void insert_packet(void *data)
 {
 	struct packet *pack=(struct packet*)data;
@@ -23,18 +23,18 @@ void insert_packet(void *data)
 	int key[ROWS];
 	struct packet *rmpack, *packet;
 	calc_index(pack, key);
-	//check if position is available 
+	/*check if position is available*/
 	if(hashtable[pack->row][key[pack->row]].pptr==NULL) 
 	{
 		hashtable[pack->row][key[pack->row]].pptr=pack;
 		update_packet(pack);
 		print_packet(pack);
 	}
-	//if not then check if the packet should be updated
+	/*if not then check if the packet should be updated*/
 	else
 	{
 		packet=hashtable[pack->row][key[pack->row]].pptr;
-		//if packet is to be updated
+		/*if packet is to be updated*/
 		if(calc_param(pack)==calc_param(packet))
 		{
 			update_packet(packet);
@@ -43,7 +43,7 @@ void insert_packet(void *data)
 
 			return;
 		}
-		//or is a new entry then remove old entry and push to the next table
+		/*or is a new entry then remove old entry and push to the next table*/
 		else
 		{
 			printf("\n\nreallocating packet:tcp\n\n\n");
@@ -64,13 +64,13 @@ void insert_packet(void *data)
 }
 
 
-//check if packetis old entry or new
+/*check if packetis old entry or new*/
 unsigned long calc_param(struct packet *packet)
 {
 	return ((packet->saddr^packet->daddr)^((packet->sport<<16)^packet->dport)&(packet->protocol));
 }
 
-//update the timestamp and count of an already existing entry in the table
+/*update the timestamp and count of an already existing entry in the table*/
 void update_packet(struct packet *packet)
 {
 	time_t rawtime;
@@ -81,7 +81,7 @@ void update_packet(struct packet *packet)
 	packet->count++;
 }
 
-// delete an entry from the table
+/* delete an entry from the table*/
 void delete_packet(void *data)
 {
 	struct packet *packet=(void*)data;
@@ -91,15 +91,15 @@ void delete_packet(void *data)
 	calc_index(packet, key);
 	for(i=0;i<ROWS;i++)
 	{
-		//if packet not present
+		/*if packet not present*/
 		if(hashtable[i][key[i]].pptr==NULL)
 			continue;
-		//if packet is present remove the entry
+		/*if packet is present remove the entry*/
 		if(calc_param(hashtable[i][key[i]].pptr)==calc_param(packet))
 		{
-			//clear the feilds
+			/*clear the feilds*/
 			memset(hashtable[i][key[i]].pptr, 0, sizeof(struct packet));
-			//freethe memory
+			/*freethe memory*/
 			free(hashtable[i][key[i]].pptr);	
 			hashtable[i][key[i]].pptr=NULL;	
 			return;
@@ -107,7 +107,7 @@ void delete_packet(void *data)
 	}
 }
 
-//lookup for an entry from the table
+/*lookup for an entry from the table*/
 void lookup_packet(void *data)
 {
 	struct packet *packet=(void*)data;
@@ -118,14 +118,14 @@ void lookup_packet(void *data)
 	
 	for(i=0;i<ROWS;i++)
 	{
-		//if entry not present
+		/*if entry not present*/
 		if(hashtable[i][key[i]].pptr==NULL)
 			continue;
-		//if entry present
+		/*if entry present*/
 		if(calc_param(hashtable[i][key[i]].pptr)==calc_param(packet))
 		{
 			printf("Packet found at table : %d index : %d\n", i, key[i]);
-			//print the found entry
+			/*print the found entry*/
 			print_packet(hashtable[i][key[i]].pptr);
 			return;
 		}
@@ -133,7 +133,7 @@ void lookup_packet(void *data)
 }
 
 
-//print the packet 
+/*print the packet*/ 
 void print_packet(struct packet *packet)
 {
 	int port;
@@ -141,22 +141,27 @@ void print_packet(struct packet *packet)
 	printf("\nThe parameters are: \n");
 	struct sockaddr_in addr;
 	addr.sin_addr.s_addr=packet->saddr;
-	//printf("src : %lu\n", packet->saddr);
+
 	strcpy(ip, inet_ntoa(addr.sin_addr));
 	printf("1. Source Address: %s\n", ip);
 	addr.sin_addr.s_addr=packet->daddr;
-	//printf("dest : %lu\n", packet->daddr);
+	
 	strcpy(ip, inet_ntoa(addr.sin_addr));
 	printf("2. Destination Address: %s\n", ip);
+	
 	port=packet->sport;
 	printf("3. Source Port: %d\n", port);
+	
 	port=packet->dport;
 	printf("4. Destination Port: %d\n", port);
+	
 	if(packet->protocol==TCP_PKT)
 		printf("5. Protocol: TCP\n");
 	else if(packet->protocol==UDP_PKT)
 		printf("5. Protocol: UDP\n");
+	
 	printf("6. timestamp: %s", packet->timestamp);
+	
 	printf("7. Count: %d\n", packet->count);
 }
 

@@ -1,13 +1,13 @@
 
 CC=gcc
 FLAGS= -I ../../include -g
-
+EXECPATH= ../../
 OBJPATH= ../../src/
 
 default: multithreadServer clean
 
 multithreadServer: server.o hash.o
-	$(CC) -o multithreadServer server.o hash.o -lpthread -g
+	$(CC) -o $(EXECPATH)multithreadServer server.o hash.o -lpthread -g
 
 server.o: server.c
 	$(CC) $(FLAGS) -c server.c

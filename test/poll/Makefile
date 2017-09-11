@@ -1,13 +1,14 @@
 
 CC=gcc
-FLAGS= -I ../../include -g
-
+FLAGS= -I../../include -g
+EXECPATH= ../../
 OBJPATH= ../../src/
+
 
 default: pollserver clean
 
 pollserver: server.o hash.o
-	$(CC) -o pollserver server.o hash.o -g
+	$(CC) -o $(EXECPATH)pollserver server.o hash.o -g
 
 server.o: server.c
 	$(CC) $(FLAGS) -c server.c

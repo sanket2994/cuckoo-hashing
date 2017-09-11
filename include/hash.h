@@ -1,5 +1,7 @@
 #ifndef __HASH_H
 #define __HASH_H
+
+
 #include<stdio.h>
 #include<netinet/in.h>
 #include<arpa/inet.h>
@@ -7,6 +9,7 @@
 #include<time.h>
 #include<sys/time.h>
 #include<string.h>
+
 #ifndef MAXLEN
 #define MAXLEN 65536
 #endif
@@ -14,16 +17,17 @@
 #define TCP_PKT 6
 #define UDP_PKT 17
 #define ROWS 4 
+//packet structure consisting of ip tuple parameters
 struct packet{
-	unsigned long saddr;
-	unsigned long daddr;
-	unsigned int sport;
-	unsigned int dport;
-	int protocol;
-	char *timestamp;
-	int count;
-	int row;
-	struct table **hashtable;
+	unsigned long saddr;   		/*source ip address*/
+	unsigned long daddr;		/*destination ip address*/
+	unsigned int sport;		/*source port*/
+	unsigned int dport;		/*destination port*/
+	int protocol;			/*protocol (TCP/UDP etc.)*/
+	char *timestamp;		/*timestamp of the last packet received*/
+	int count;			/*number of packets received of the same flow*/
+	int row;			/*the row number or table number in which the packet is hashed*/
+	struct table **hashtable;	/*The pointer to the hashtable*/
 };	
 
 //structure table consisting of pointer to a packet

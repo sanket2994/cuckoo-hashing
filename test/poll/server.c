@@ -19,8 +19,22 @@ int main(int argc, char **argv)
 	int i, ret, stfd, sufd, slen, clen, ctfd, portno;
 	struct sockaddr_in saddr, caddr;
 	char buff[100], *ip;
-	ip=argv[1];
-	sscanf(argv[2],"%d", &portno);
+	ip=(char*)calloc(1,16);
+	
+	/*if command line arguments passed */
+	if(argc==3)
+	{
+		ip=argv[1];
+		sscanf(argv[2],"%d", &portno);
+	}
+	/*if not passed */
+	else
+	{
+		printf("Enter the ip : ");
+		scanf("%s", ip);
+		printf("Enter the prot number: ");
+		scanf("%d", &portno);
+	}
 
 	char *buff1=(char*)calloc(1, sizeof(struct packet));
 	struct table **hashtable=(struct table**)calloc(ROWS, sizeof(struct table*));	
@@ -32,6 +46,7 @@ int main(int argc, char **argv)
 	struct pollfd clifd[MAX_CLI];
 	memset(clifd, 0, sizeof(clifd));
 	int nfds=0;
+	/*create socket for tcp*/
 	stfd=socket(AF_INET, SOCK_STREAM, 0);
 	if(stfd==-1)
 	{
@@ -45,6 +60,7 @@ int main(int argc, char **argv)
 	saddr.sin_family=AF_INET;
 	slen=sizeof(saddr);
 	clen=sizeof(caddr);
+	/*bind tcp socket*/
 	ret=bind(stfd, (struct sockaddr*)&saddr, slen);
 	if(ret)
 	{
@@ -59,6 +75,7 @@ int main(int argc, char **argv)
 		return -1;
 	}
 	
+	/*Create udp socket*/
 	sufd=socket(AF_INET, SOCK_DGRAM, 0);
 	if(sufd==-1)
 	{
@@ -66,6 +83,7 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
+	/*bind udp socket*/
 	ret=bind(sufd, (struct sockaddr*)&saddr, slen);
 	if(ret)
 	{
@@ -94,9 +112,10 @@ int main(int argc, char **argv)
 
 		for(i=0; i<nfds; i++)
 		{
+			/*check for activity on sockets*/
 			if(clifd[i].revents & POLLIN)
 			{
-				
+				/*If activity is on udp socket*/
 				if(clifd[i].fd==sufd)
 				{
 					printf("\n\nNew udp connection established at : ");
@@ -108,6 +127,8 @@ int main(int argc, char **argv)
 					printf("%s\n", inet_ntoa(caddr.sin_addr));
 					printf("The received packet is: %s\n", buff);
 					struct packet *packet=(struct packet*)calloc(1, sizeof(struct packet));		
+					
+					/*If user sent a delete command*/
 					if(strcmp(buff, "delete")==0)
 					{
 						recvfrom(sufd, buff1, sizeof(struct packet), 0, (struct sockaddr*)&caddr, &clen);
@@ -119,6 +140,7 @@ int main(int argc, char **argv)
 						break;
 					}	
 
+					/*if user wants to look up an entry*/
 					if(strcmp(buff, "lookup")==0)
 					{
 						recvfrom(sufd, buff1, sizeof(struct packet), 0, (struct sockaddr*)&caddr, &clen);
@@ -140,8 +162,10 @@ int main(int argc, char **argv)
 					break;
 				}
 
+				/*if activity is on tcp socket*/
 				if(clifd[i].fd==stfd)
 				{
+					/*accept a new tcp connection*/
 					ctfd=accept(clifd[i].fd, (struct sockaddr*)&caddr, &clen);
 					if(ctfd==-1)
 					{
@@ -158,6 +182,8 @@ int main(int argc, char **argv)
 			
 										
 					struct packet *packet=(struct packet*)calloc(1, sizeof(struct packet));
+						
+					/* if user want to delete packet*/
 					if(strcmp(buff, "delete")==0)
 					{
 						read(clifd[nfds].fd, buff1,sizeof(struct packet));
@@ -169,6 +195,7 @@ int main(int argc, char **argv)
 						break;
 					}	
 
+					/*if user wants to lookup for an entry*/
 					if(strcmp(buff, "lookup")==0)
 					{
 						read(clifd[nfds].fd, buff1, sizeof(struct packet));
@@ -191,9 +218,10 @@ int main(int argc, char **argv)
 					nfds++;
 
 				}
-				
+				/*exixting tcp connection*/
 				else
 				{	
+					/*check if connection is closing*/
 					if(read(clifd[i].fd, buff, 100)==0)
 					{
 						close(clifd[i].fd);
@@ -205,6 +233,7 @@ int main(int argc, char **argv)
 						}
 						nfds--;
 					}
+					/* read data from a already connected client*/
 					else
 					{
 						ret=recv(clifd[i].fd, buff, sizeof(buff), 0);
@@ -215,7 +244,30 @@ int main(int argc, char **argv)
 						printf("\nThe received data is: %s\n", buff);
 											
 						struct packet *packet=(struct packet*)calloc(1, sizeof(struct packet));
-				
+						/*If user sent a delete command*/
+						if(strcmp(buff, "delete")==0)
+						{
+							recvfrom(sufd, buff1, sizeof(struct packet), 0, (struct sockaddr*)&caddr, &clen);
+							struct packet *delpacket;
+							delpacket=(struct packet*)buff1;
+							delpacket->hashtable=hashtable;
+							delete_packet((void*)delpacket);
+							memset(delpacket, 0, sizeof(struct packet));
+							break;
+						}	
+	
+						/*if user wants to look up an entry*/
+						if(strcmp(buff, "lookup")==0)
+						{
+							recvfrom(sufd, buff1, sizeof(struct packet), 0, (struct sockaddr*)&caddr, &clen);
+							struct packet *lookPacket;
+							lookPacket=(struct packet*)buff1;
+							lookPacket->hashtable=hashtable;
+							lookup_packet((void*)lookPacket);
+							memset(lookPacket, 0, sizeof(struct packet));				
+							break;
+						}
+		
 						packet->protocol=6;
 						packet->saddr=caddr.sin_addr.s_addr;
 						packet->daddr=saddr.sin_addr.s_addr;
@@ -235,40 +287,4 @@ int main(int argc, char **argv)
 	}	
 	
 }
-
-
-
-	
-	
-	
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

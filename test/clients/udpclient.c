@@ -13,12 +13,21 @@ int main(int argc, char *argv[])
 {
 	int sfd, ret, slen, portno;
 	struct sockaddr_in saddr;
-	char buff[100];
-	
-	char *ip=argv[1];
-	sscanf(argv[2], "%d", &portno);
+	char buff[100], *ip;
+	ip=(char*)calloc(1,16);
+	if(argc==3)
+	{	
+		ip=argv[1];
+		sscanf(argv[2], "%d", &portno);
+	}
+	else
+	{
+		printf("Enter the ip address: " );
+		scanf("%s", ip);
+		printf("Enter port no.: ");
+		scanf("%d", &portno);
+        }
 
-	
 	sfd=socket(AF_INET, SOCK_DGRAM, 0);
 	if(sfd==-1)
 	{
@@ -31,7 +40,7 @@ int main(int argc, char *argv[])
 	saddr.sin_port=htons(portno);
 	slen=sizeof(saddr);
 	printf("Enter packet to be sent: ");
-	scanf("%[^\n]s",buff);
+	scanf(" %[^\n]s",buff);
 	sendto(sfd, buff, sizeof(buff), 0, (struct sockaddr*)&saddr, slen);
 
 	

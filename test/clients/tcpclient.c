@@ -13,12 +13,22 @@ int main(int argc, char **argv)
 	struct sockaddr_in caddr,saddr;
 	socklen_t clen,slen;
 	char buff[100], *ip;
-
-	ip=argv[1];
-	sscanf(argv[2], "%d", &portno);
+	ip=(char*)calloc(1, 16);
+	if(argc>2 && argc <4)
+	{
+		ip=argv[1];
+		sscanf(argv[2], "%d", &portno);
+	}
+	else
+	{
+		printf("Enter the ip : ");
+		scanf("%s", ip);
+		printf("Enter the prot number: ");
+		scanf("%d", &portno);
+	}
 
 	cfd=socket(AF_INET, SOCK_STREAM, 0);
-	if(sfd<0)
+	if(cfd<0)
 	{
 		perror("socket: ");
 		return -1;
@@ -39,7 +49,7 @@ int main(int argc, char **argv)
 		return -1;
 	}
 	printf("Enter the message to be sent: ");
-	scanf("%[^\n]s",buff);
+	scanf(" %[^\n]s",buff);
 
 	//check if user wants to perform deletion or lookup of a packet
 	if(strcmp(buff, "delete")==0 || strcmp(buff, "lookup")==0)

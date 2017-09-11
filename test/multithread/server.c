@@ -28,14 +28,14 @@ struct threadParamUDP{
 };
 
 
-//thread for udp type connection
+/*thread for udp type connection */
 void* udpHandler(void *data)
 {
 	
 	char buff[100];
 	char *buff1=(char*)calloc(1,sizeof(struct packet));
 	struct threadParamUDP *args=(struct threadParamUDP*)data;
-	//receive data from user
+	/*receive data from user */
 	int ret= recvfrom(args->socketfd, buff, sizeof(buff), 0, (struct sockaddr*)&args->caddr, &args->clen);
 	if(ret<0)
 	{
@@ -43,7 +43,7 @@ void* udpHandler(void *data)
 		return NULL;
 	}
 	
-	//check if user wants to delete entry
+	/*check if user wants to delete entry */
 	if(strcmp(buff, "delete")==0)
 	{
 		struct packet *delpacket;
@@ -55,7 +55,7 @@ void* udpHandler(void *data)
 		return NULL;
 	}
 
-	//check if user wants to lookup for an entry
+	/*check if user wants to lookup for an entry */
 	if(strcmp(buff, "lookup")==0)
 	{
 		struct packet *lookpacket;
@@ -67,7 +67,7 @@ void* udpHandler(void *data)
 		return NULL;
 	}
 	
-	//or else insert the entry
+	/*or else insert the entry */
 	struct packet *packet=(struct packet*)calloc(1, sizeof(struct packet));
 	packet->saddr=args->caddr.sin_addr.s_addr;
 	packet->daddr=args->saddr.sin_addr.s_addr;
@@ -84,7 +84,7 @@ void* udpHandler(void *data)
 
 
 
-//thread for tcp connection
+/*thread for tcp connection */
 void* tcpHandler(void *data)
 {
 	
@@ -96,7 +96,7 @@ void* tcpHandler(void *data)
 	
 	while((cnt=read(args->socketfd, buff, sizeof(buff)))>0)
 	{
-		//check if user wants to delete an entry
+		/* check if user wants to delete an entry */
 		if(strcmp(buff, "delete")==0)
 		{
 			struct packet *delpacket;
@@ -107,7 +107,7 @@ void* tcpHandler(void *data)
 			memset(delpacket, 0, sizeof(struct packet));
 			return NULL;
 		}
-		//check if user wants to look up an entry
+		/*check if user wants to look up an entry */
 		if(strcmp(buff, "lookup")==0)
 		{
 			struct packet *lookpacket;
@@ -118,7 +118,7 @@ void* tcpHandler(void *data)
 			memset(lookpacket, 0, sizeof(struct packet));
 			return NULL;
 		}
-		// or else simply hash the entry onto table
+		/* or else simply hash the entry onto table */
 		struct packet *packet=(struct packet*)calloc(1, sizeof(struct packet));
 		packet->saddr=args->ctaddr.sin_addr.s_addr;
 		packet->daddr=args->staddr.sin_addr.s_addr;
@@ -155,13 +155,25 @@ int main(int argc, char **argv)
 	struct sockaddr_in saddr, caddr;
 	fd_set readfds;
 	char buff[100];
-	char *ip=argv[1];
-	sscanf(argv[2], "%d", &portno);
+	char *ip=(char*)calloc(1, 16);
+	if(argc==3)
+	{
+		ip=argv[1];
+		sscanf(argv[2], "%d", &portno);
+	}
+	else
+	{
+		printf("Enter the ip : ");
+		scanf("%s", ip);
+		printf("Enter the prot number: ");
+		scanf("%d", &portno);
+	}
+
 	struct table **hashtable=(struct table**)calloc(ROWS, sizeof(struct table*));
 	for(i=0;i<ROWS;i++)
 		*(hashtable+i)=(struct table*)calloc(MAX_CLI, sizeof(struct table));
 
-	//create tcp socket
+	/* create tcp socket */
 	stfd= socket(AF_INET, SOCK_STREAM, 0);
 	if(stfd==-1)
 	{
@@ -174,7 +186,7 @@ int main(int argc, char **argv)
 	saddr.sin_port=htons(portno);
 	slen= sizeof(saddr);
 	clen= sizeof(caddr);
-	// bind tcp socket
+	/* bind tcp socket */
 	ret= bind(stfd, (struct sockaddr*)&saddr, slen);
 	if(ret)
 	{
@@ -188,7 +200,7 @@ int main(int argc, char **argv)
 		perror("listen");
 		return -1;
 	}
-	//create an udp socket
+	/* create an udp socket */
 	sufd=socket(AF_INET, SOCK_DGRAM, 0);
 	if(sufd==-1)
 	{
@@ -201,7 +213,7 @@ int main(int argc, char **argv)
 	slen= sizeof(saddr);
 	clen= sizeof(caddr);
 
-	//bind udp socket
+	/* bind udp socket */
 	ret= bind(sufd, (struct sockaddr*)&saddr, slen);
 	if(ret)
 	{
@@ -220,7 +232,7 @@ int main(int argc, char **argv)
 		else
 			maxfd=stfd;
 
-		//check for activity on the two sockets i.e tcp and udp
+		/* check for activity on the two sockets i.e tcp and udp */
 		ret=select(maxfd+1, &readfds, NULL, NULL, NULL);
 		if(ret==-1)
 		{
@@ -228,10 +240,10 @@ int main(int argc, char **argv)
 			return -1;
 		}
 
-		//check if activity is on udp socket
+		/* check if activity is on udp socket */
 		if(FD_ISSET(sufd, &readfds))
 		{
-			//fill the udp thread structure
+			/* fill the udp thread structure */
 			struct threadParamUDP args;
 			args.caddr=caddr;
 			args.saddr=saddr;
@@ -239,11 +251,11 @@ int main(int argc, char **argv)
 			args.clen=clen;
 			args.slen=slen;
 			args.hashtable=hashtable;
-			//create a new udp thread
+			/*create a new udp thread */
 			pthread_create(&udpThread, NULL, udpHandler, (void*)&args);
 			
 		}
-		//check if connection is on tcp socket
+		/* check if connection is on tcp socket */
 		if(FD_ISSET(stfd, &readfds))
 		{
 			printf("\nsetting up an tcp client: \n\n");
@@ -254,7 +266,7 @@ int main(int argc, char **argv)
 				return -1;
 			}
 			printf("setup: %s\n", inet_ntoa(caddr.sin_addr));
-			//fill the tcp thread structure
+			/* fill the tcp thread structure */
 			struct threadParamTCP args;
 			args.ctaddr=caddr;
 			args.staddr=saddr;
@@ -262,7 +274,7 @@ int main(int argc, char **argv)
 			args.ctlen=clen;
 			args.stlen=slen;
 			args.hashtable=hashtable;
-			//create a new thread for tcp connection
+			/*create a new thread for tcp connection*/
 			pthread_create(&tcpThread, NULL, tcpHandler, (void*)&args);
 
 		}

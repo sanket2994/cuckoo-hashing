@@ -17,7 +17,7 @@
 #define TCP_PKT 6
 #define UDP_PKT 17
 #define ROWS 4 
-//packet structure consisting of ip tuple parameters
+/*packet structure consisting of ip tuple parameters*/
 struct packet{
 	unsigned long saddr;   		/*source ip address*/
 	unsigned long daddr;		/*destination ip address*/
@@ -30,13 +30,13 @@ struct packet{
 	struct table **hashtable;	/*The pointer to the hashtable*/
 };	
 
-//structure table consisting of pointer to a packet
+/*structure table consisting of pointer to a packet */
 struct table{
 	struct packet *pptr;
 };
 
 
-//function to hash the function onto the table
+/*function to hash the function onto the table*/
 void insert_packet(void *data);
 /*
 * in order to use this function first you need to fill the packet structure alsoyou need to create a hashtable of type struct table .
@@ -44,6 +44,7 @@ void insert_packet(void *data);
 * typecast the packet using a void pointer and pass it as an argument to this function
 */
 
+/*Delete a pcket from the table*/
 void delete_packet(void *data);
 /*
 *This is the function to remove a previously hashed entry from the table.
@@ -52,6 +53,7 @@ void delete_packet(void *data);
 *then typecast the structure using void pointer and pass it as an argument.
 */
 
+/*Lookup for a packet from the hash table*/
 void lookup_packet(void *data);
 /*
 *This is function to lookup for an entry into the hashtable
@@ -60,12 +62,14 @@ void lookup_packet(void *data);
 *then typecast the struct using void pointer and pass it as an argument to the function
 */
 
+/*Update the timestamp and count of the packet*/
 void update_packet(struct packet *pack);
 /*
 *This function is called internally by insert_packet
 *This udates the timestamp and the count of the packet
 */
 
+/*calculate the key*/
 void calc_index(struct packet *pack, int *key);
 /*
 *used for calcuating the key of the hashtable
@@ -74,35 +78,17 @@ void calc_index(struct packet *pack, int *key);
 *hence pointer to struct packet and an int array is passed as arguments
 */
 
+/*Print the packet information*/
 void print_packet(struct packet *pack);
 /*
 *function prints all the contents of the packet present at a particular index of hash table
 * it prints out src address, dst address, src port, dest port, protocol, timestamp and count
 */
+
+
 unsigned long calc_param(struct packet *pack);
 /*
 *This is used to compare the packets which caluates a unique value and check if the collided entry is for updation or for insertion.
 */
 #endif
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

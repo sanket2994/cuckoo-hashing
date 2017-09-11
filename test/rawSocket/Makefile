@@ -1,13 +1,13 @@
 
 CC=gcc
 FLAGS= -I../../include
-
+EXECPATH= ../../
 OBJPATH= ../../src/
 
 default: rawServer clean
 
 rawServer: server.o hash.o
-	$(CC) -o rawServer server.o hash.o -g
+	$(CC) -o $(EXECPATH)rawServer server.o hash.o -g
 
 server.o: server.c
 	$(CC) $(FLAGS) -c server.c 

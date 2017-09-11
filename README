@@ -42,14 +42,17 @@ The hash libary consists of three main functions:
 
 In order to use test this library clone this repository and simply type $ make on the terminal.
 once you do that you will find muktiple executable files created namely: 
+
 	 rawServer, multithreadServer and  pollServer: use any one of these server applications by running them on the terminal. 
-Give IP address of the server and he port number as the command line arguments respectively.
+
+Give IP address of the server and the port number as the command line arguments respectively.
+If you don't specify any arguments then specify the ip address and port number when asked at runtime.
 Don't give any arguments if you are using rawServer.
 
 
-also you willfind two more additional executables for clients namely: 
+Also you will find two more additional executables for clients namely: 
 	tcpclient and udpclient: use any of these or use bith of them simultaniously by running them on the terminal.
-(give IP address of the server and he port number as the command linearguments respectively)
+(give IP address of the server and he port number as the command line arguments respectively or specify them when asked at runtime)
 	1. In order to delete or lookup for an packet firse type "delete" or "lookup" respectively and then type in the IP tuple parameters 
 		of the packet to be deleted or searched.
 	2. If you just want to insert the packet then just type in the message you want to send.
@@ -64,46 +67,29 @@ Here is an example of how to run the files on terminal:
 $ make
 
 $ ./pollserver <IP_ADDRESS> <PORT_NUMBER>
+	OR
+$ ./pollserver
+	#Then enter the ip address and port number when asked at runtime
 
 #on other terminal
 $./tcpclient <IP_ADDRESS> <PORT_NUMBER>
+
+	OR
+$./tcpclient
+	#Then enter the ip address and port number when asked at runtime
+
+#for deletion or lookup
+$./tcpclient <IP_ADDRESS> <PORT_NUMBER>
+#then when asked about message enter "lookup" or "delete" for searching a entry or deleting an entry respectively
+
+$. enter message to send: lookup
+	#then you will be asked top enter the parameters of packet to be searched or deleted
+
 
 #if want to delete all the executables created
 $make clean
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Note: This repository only handles IPv4 packets.
 

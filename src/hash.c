@@ -51,11 +51,15 @@ void insert_packet(void *data)
 			struct packet *rmpack=hashtable[pack->row][key[pack->row]].pptr;
 			if(pack->row<(ROWS-1))
 			{
-				rmpack->row=pack->row+1;	
+				hashtable[pack->row][key[pack->row]].pptr=NULL;
+				insert_packet((void*)pack);
+				rmpack->row=rmpack->row+1;	
 				insert_packet((void*)rmpack);
 			}
 			else
 			{
+				hashtable[pack->row][key[pack->row]].pptr=NULL;
+				insert_packet((void*)pack);
 				rmpack->row=0;
 				insert_packet((void*)rmpack);
 			}
